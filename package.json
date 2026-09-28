@@ -1,0 +1,15 @@
+{
+  "name": "tp-video-grupo8",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Slides animadas en HTML/CSS para el video del TP grupal - Sociedad, Cultura, Educacion y Tecnologias",
+  "scripts": {
+    "record": "node record-runner.js"
+  },
+  "dependencies": {
+    "playwright": "^1.56.0"
+  },
+  "devDependencies": {
+    "ffmpeg-static": "^5.3.0"
+  }
+}

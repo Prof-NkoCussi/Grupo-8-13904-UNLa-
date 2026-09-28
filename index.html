@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aprender más allá del aula — Grupo 8 · UNLa</title>
+<meta name="description" content="Ponencia del Grupo 8 — Sociedad, Cultura, Educación y Tecnologías (UNLa). El sujeto escolar en la cultura digital.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Aprender más allá del aula — Grupo 8 · UNLa">
+<meta property="og:description" content="El sujeto escolar en la cultura digital. Ponencia del Grupo 8 — Sociedad, Cultura, Educación y Tecnologías.">
+<meta property="og:image" content="https://prof-nkocussi.github.io/Grupo-8-13904-UNLa/assets/preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/fotos/logo1.jpg">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
+<style>
+  :root{
+    --bg:#06111f; --navy:#0d2440; --cyan:#0cc0df; --text:#f5f7fa; --muted:rgba(245,247,250,.65);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:'Manrope',system-ui,sans-serif;overflow:hidden}
+
+  /* Escenario 16:9 que se adapta a cualquier pantalla */
+  .player{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+  .stage{position:relative;width:min(100vw,calc(100vh * 16 / 9));aspect-ratio:16/9;background:var(--navy);overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  .stage iframe{position:absolute;top:0;left:0;width:1280px;height:720px;border:0;transform-origin:0 0;opacity:0;transition:opacity .7s ease;pointer-events:none}
+  .stage iframe.on{opacity:1}
+
+  /* Pantalla de inicio y de cierre */
+  .overlay{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;padding:24px;
+    background:radial-gradient(ellipse at center,rgba(13,36,64,.55) 0%,rgba(6,17,31,.92) 75%);backdrop-filter:blur(3px);transition:opacity .5s ease}
+  .overlay.hidden{opacity:0;pointer-events:none}
+  .overlay img{height:clamp(36px,7vw,56px);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+  .overlay h1{margin:0;font-size:clamp(22px,4.6vw,52px);font-weight:800;line-height:1.1}
+  .overlay h1 span{color:var(--cyan)}
+  .overlay p{margin:0;font-size:clamp(13px,1.9vw,19px);color:var(--muted);font-weight:500}
+  .big-play{margin-top:8px;display:inline-flex;align-items:center;gap:12px;padding:clamp(10px,1.6vw,16px) clamp(20px,3vw,32px);border:0;border-radius:999px;background:var(--cyan);color:var(--navy);
+    font:800 clamp(15px,2vw,20px) 'Manrope',sans-serif;cursor:pointer;box-shadow:0 0 0 0 rgba(12,192,223,.6);animation:pulse 2.2s ease-out infinite}
+  .big-play:hover{filter:brightness(1.08)}
+  .big-play svg{width:1.2em;height:1.2em}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(12,192,223,.55)}100%{box-shadow:0 0 0 22px rgba(12,192,223,0)}}
+  .hint{font-size:12px!important;opacity:.7}
+
+  /* Barra de controles */
+  .controls{position:absolute;left:0;right:0;bottom:0;z-index:4;padding:28px 18px 12px;background:linear-gradient(transparent,rgba(4,12,24,.85));
+    display:flex;flex-direction:column;gap:10px;transition:opacity .35s ease}
+  .player.idle .controls,.player.pre .controls{opacity:0;pointer-events:none}
+  .player.idle{cursor:none}
+  .progress{display:flex;gap:4px;height:14px;align-items:center;cursor:pointer}
+  .seg{position:relative;height:5px;border-radius:3px;background:rgba(255,255,255,.22);overflow:hidden;transition:height .15s}
+  .progress:hover .seg{height:8px}
+  .seg i{position:absolute;inset:0;width:0;background:var(--cyan)}
+  .row{display:flex;align-items:center;gap:6px}
+  .btn{width:38px;height:38px;border:0;border-radius:999px;background:transparent;color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .btn:hover{background:rgba(255,255,255,.12)}
+  .btn svg{width:22px;height:22px}
+  .time{font-size:13px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums;margin-left:6px}
+  .now{margin-left:auto;font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .now b{color:var(--cyan)}
+  @media (max-width:560px){.now{display:none}.btn{width:34px;height:34px}.controls{padding:20px 10px 8px}}
+</style>
+</head>
+<body>
+
+<div class="player pre" id="player">
+  <div class="stage" id="stage">
+
+    <div class="overlay" id="start">
+      <img src="assets/fotos/logo1.jpg" alt="Universidad Nacional de Lanús">
+      <h1>Aprender <span>más allá</span> del aula</h1>
+      <p>El sujeto escolar en la cultura digital · Grupo 8</p>
+      <button class="big-play" id="startBtn">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        Reproducir
+      </button>
+      <p class="hint">Activá el sonido 🔊</p>
+    </div>
+
+    <div class="overlay hidden" id="end">
+      <img src="assets/fotos/logo1.jpg" alt="Universidad Nacional de Lanús">
+      <h1>¡Muchas <span>gracias</span>!</h1>
+      <p>Nicolás A. Cussi · Silvana Gandur · Rocío Gomez · Maximiliano Garay</p>
+      <button class="big-play" id="replayBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        Ver de nuevo
+      </button>
+    </div>
+
+    <div class="controls" id="controls">
+      <div class="progress" id="progress"></div>
+      <div class="row">
+        <button class="btn" id="prevBtn" title="Slide anterior (←)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
+        <button class="btn" id="playBtn" title="Reproducir / pausar (espacio)"></button>
+        <button class="btn" id="nextBtn" title="Slide siguiente (→)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6z"/></svg></button>
+        <span class="time" id="time">0:00 / 0:00</span>
+        <span class="now" id="now"></span>
+        <button class="btn" id="fsBtn" title="Pantalla completa (F)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  // Cada slide con su audio. La duración es de respaldo hasta que carga el audio.
+  const SLIDES = [
+    { src: 'slides/slide1/slide1.html', audio: 'assets/audios/1-NICO.mp3',    who: 'Nicolás',     title: 'Portada',                        dur: 12.5 },
+    { src: 'slides/slide2/slide2.html', audio: 'assets/audios/2-SILVANA.mp3', who: 'Silvana',     title: 'El sujeto escolar en la cultura digital', dur: 33.5 },
+    { src: 'slides/slide3/slide3.html', audio: 'assets/audios/3-RO.mp3',      who: 'Rocío',       title: 'Aprendizaje ubicuo',             dur: 24.3 },
+    { src: 'slides/slide4/slide4.html', audio: 'assets/audios/4-MAXI.mp3',    who: 'Maximiliano', title: 'De la información al conocimiento', dur: 25.6 },
+    { src: 'slides/slide5/slide5.html', audio: 'assets/audios/5-NICO.mp3',    who: 'Nicolás',     title: 'La escuela y el docente hoy',    dur: 27.3 }
+  ];
+  const HOLD = 1.2; // segundos de pausa entre slides, cuando termina el audio
+
+  const $ = id => document.getElementById(id);
+  const player = $('player'), stage = $('stage'), progress = $('progress');
+  const ICON_PLAY  = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+  const ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>';
+
+  let current = -1, playing = false, frame = null, advanceTimer = null;
+
+  // Audios precargados
+  SLIDES.forEach((s, i) => {
+    s.el = new Audio(s.audio);
+    s.el.preload = 'auto';
+    s.el.addEventListener('loadedmetadata', () => { if (isFinite(s.el.duration)) { s.dur = s.el.duration; layoutProgress(); } });
+    s.el.addEventListener('ended', () => {
+      if (i !== current) return;
+      advanceTimer = setTimeout(() => current < SLIDES.length - 1 ? go(current + 1) : finish(), HOLD * 1000);
+    });
+  });
+
+  // Barra de progreso: un segmento por slide, proporcional a su audio
+  const segs = SLIDES.map(() => {
+    const d = document.createElement('div'); d.className = 'seg';
+    d.appendChild(document.createElement('i'));
+    progress.appendChild(d); return d;
+  });
+  function layoutProgress() { segs.forEach((d, i) => d.style.flex = SLIDES[i].dur + ' 1 0'); updateUI(); }
+
+  progress.addEventListener('click', e => {
+    const i = segs.findIndex(d => { const r = d.getBoundingClientRect(); return e.clientX >= r.left && e.clientX <= r.right + 4; });
+    if (i < 0) return;
+    const r = segs[i].getBoundingClientRect();
+    const offset = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * SLIDES[i].dur;
+    go(i, offset);
+  });
+
+  // Escala las slides (1280x720) al tamaño del escenario
+  function fit() {
+    const s = stage.clientWidth / 1280;
+    stage.querySelectorAll('iframe').forEach(f => f.style.transform = `scale(${s})`);
+  }
+  addEventListener('resize', fit);
+
+  // Congela / reanuda las animaciones dentro de la slide
+  function setAnimations(run) {
+    try {
+      const doc = frame && frame.contentDocument;
+      if (!doc) return;
+      doc.getAnimations().forEach(a => run ? a.play() : a.pause());
+      doc.querySelectorAll('svg').forEach(s => run ? s.unpauseAnimations() : s.pauseAnimations());
+    } catch (e) { /* abierto como archivo local: se ignora */ }
+  }
+
+  function stopAll() {
+    clearTimeout(advanceTimer);
+    SLIDES.forEach(s => { s.el.pause(); });
+  }
+
+  // Muestra la slide i, con fundido, y arranca su audio cuando cargó
+  function go(i, offset = 0) {
+    stopAll();
+    $('end').classList.add('hidden');
+    const old = frame;
+    const f = document.createElement('iframe');
+    f.setAttribute('scrolling', 'no');
+    f.setAttribute('aria-label', 'Slide ' + (i + 1));
+    f.src = SLIDES[i].src;
+    stage.insertBefore(f, $('start'));
+    frame = f; current = i; fit();
+    f.addEventListener('load', () => {
+      if (frame !== f) return;
+      requestAnimationFrame(() => f.classList.add('on'));
+      if (old) setTimeout(() => old.remove(), 800);
+      const a = SLIDES[i].el;
+      a.currentTime = offset;
+      if (playing) a.play().catch(() => {}); else setAnimations(false);
+    });
+    updateUI();
+  }
+
+  function play() {
+    playing = true;
+    if (current < 0) return go(0);
+    SLIDES[current].el.play().catch(() => {});
+    setAnimations(true);
+    updateUI();
+  }
+  function pause() {
+    playing = false;
+    stopAll();
+    setAnimations(false);
+    updateUI();
+  }
+  function finish() {
+    playing = false;
+    $('end').classList.remove('hidden');
+    updateUI();
+  }
+
+  // Tiempos y barra
+  const fmt = t => Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0');
+  const total = () => SLIDES.reduce((a, s) => a + s.dur, 0);
+  function updateUI() {
+    $('playBtn').innerHTML = playing ? ICON_PAUSE : ICON_PLAY;
+    let elapsed = 0;
+    SLIDES.forEach((s, i) => {
+      const t = i < current ? s.dur : i === current ? Math.min(s.el.currentTime, s.dur) : 0;
+      segs[i].firstChild.style.width = (t / s.dur * 100) + '%';
+      elapsed += t;
+    });
+    $('time').textContent = fmt(elapsed) + ' / ' + fmt(total());
+    const s = SLIDES[Math.max(current, 0)];
+    $('now').innerHTML = `${Math.max(current, 0) + 1}/5 · ${s.title} · <b>${s.who}</b>`;
+  }
+  (function loop() { updateUI(); requestAnimationFrame(loop); })();
+
+  // Botones y teclado
+  $('startBtn').onclick = () => { $('start').classList.add('hidden'); player.classList.remove('pre'); play(); };
+  $('replayBtn').onclick = () => { playing = true; go(0); };
+  $('playBtn').onclick = () => playing ? pause() : ($('start').classList.contains('hidden') ? play() : $('startBtn').click());
+  $('prevBtn').onclick = () => { if (current > 0) go(current - 1); else if (current === 0) go(0); };
+  $('nextBtn').onclick = () => { if (current >= 0 && current < SLIDES.length - 1) go(current + 1); };
+  $('fsBtn').onclick = () => {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else (player.requestFullscreen || player.webkitRequestFullscreen || (() => {})).call(player);
+  };
+  addEventListener('keydown', e => {
+    if (e.key === ' ' || e.key === 'k') { e.preventDefault(); $('playBtn').click(); }
+    else if (e.key === 'ArrowRight') $('nextBtn').click();
+    else if (e.key === 'ArrowLeft') $('prevBtn').click();
+    else if (e.key === 'f' || e.key === 'F') $('fsBtn').click();
+  });
+
+  // Oculta los controles si no se mueve el mouse durante la reproducción
+  let idleTimer;
+  function wake() {
+    player.classList.remove('idle');
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => { if (playing) player.classList.add('idle'); }, 2500);
+  }
+  ['mousemove', 'touchstart', 'keydown'].forEach(ev => addEventListener(ev, wake, { passive: true }));
+
+  // Clic sobre la slide: pausa / reanuda
+  stage.addEventListener('click', e => {
+    if (e.target === stage && current >= 0) $('playBtn').click();
+  });
+
+  layoutProgress();
+  wake();
+})();
+</script>
+</body>
+</html>

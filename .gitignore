@@ -1,0 +1,4 @@
+node_modules/
+export/
+*.webm
+*.mp4
